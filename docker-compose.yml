@@ -77,10 +77,13 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgis/postgis:13-3.4-alpine
+    platform: linux/arm64
+    image: ghcr.io/baosystems/postgis:13-3.3
     environment:
       POSTGRES_PASSWORD: secret
       POSTGRES_DB: directus
+    volumes:
+      - ./db:/var/lib/postgresql/data
     ports:
       - 5100:5432
 
