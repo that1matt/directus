@@ -12,6 +12,7 @@ interface Props {
 	multiple?: boolean;
 	preset?: Record<string, any>;
 	fileId?: string;
+	fileVersion?: number;
 	/** In case that the user isn't allowed to upload files */
 	fromUser?: boolean;
 	fromUrl?: boolean;
@@ -80,13 +81,22 @@ function useUpload() {
 
 				uploadedFiles && emit('input', uploadedFiles);
 			} else {
+				const version = props.fileId
+					? {
+							version: (props?.fileVersion || 0) + 1,
+					  }
+					: {};
+
 				const uploadedFile = await uploadFile(Array.from(files)[0] as File, {
 					onProgressChange: (percentage) => {
 						progress.value = percentage;
 						done.value = percentage === 100 ? 1 : 0;
 					},
 					fileId: props.fileId,
-					preset,
+					preset: {
+						...preset,
+						...version,
+					},
 				});
 
 				uploadedFile && emit('input', uploadedFile);
@@ -193,9 +203,16 @@ function useURLImport() {
 	async function importFromURL() {
 		loading.value = true;
 
+		const version = props.fileId
+			? {
+					version: (props?.fileVersion || 0) + 1,
+			  }
+			: {};
+
 		const data = {
 			...props.preset,
 			...(props.folder && { folder: props.folder }),
+			...version,
 			id: props.fileId,
 		};
 

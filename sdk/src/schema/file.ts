@@ -18,6 +18,7 @@ export type DirectusFile<Schema> = MergeCoreCollection<
 		uploaded_on: 'datetime';
 		modified_by: DirectusUser<Schema> | string | null;
 		modified_on: 'datetime';
+		version: number | null;
 		charset: string | null;
 		filesize: string | null;
 		width: number | null;

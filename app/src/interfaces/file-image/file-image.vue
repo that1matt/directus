@@ -41,7 +41,7 @@ const value = computed({
 });
 
 const query = ref<RelationQuerySingle>({
-	fields: ['id', 'title', 'width', 'height', 'filesize', 'type', 'filename_download', 'modified_on'],
+	fields: ['id', 'title', 'width', 'height', 'filesize', 'type', 'filename_download', 'modified_on', 'version'],
 });
 
 const { collection, field } = toRefs(props);
@@ -54,7 +54,10 @@ const {
 	remove,
 	refresh,
 } = useRelationSingle<
-	Pick<File, 'id' | 'title' | 'width' | 'height' | 'filesize' | 'type' | 'filename_download' | 'modified_on'>
+	Pick<
+		File,
+		'id' | 'title' | 'width' | 'height' | 'filesize' | 'type' | 'filename_download' | 'modified_on' | 'version'
+	>
 >(value, query, relationInfo, { enabled: computed(() => !props.loading) });
 
 const { t, n, te } = useI18n();

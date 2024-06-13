@@ -160,3 +160,8 @@ fields:
   - field: duration
     width: half
     readonly: true
+
+  - field: version
+    interface: input
+    width: half
+    readonly: true

@@ -5,7 +5,7 @@ import type { File } from '@directus/types';
 import { computed, toRef } from 'vue';
 
 export interface Props {
-	file: Pick<File, 'id' | 'title' | 'type' | 'modified_on' | 'width' | 'height'>;
+	file: Pick<File, 'id' | 'title' | 'type' | 'modified_on' | 'width' | 'height' | 'version'>;
 	preset?: string | null;
 	inModal?: boolean;
 }
