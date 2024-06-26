@@ -1,7 +1,6 @@
 ---
 '@directus/system-data': patch
 '@directus/types': patch
-'docs': patch
 '@directus/api': patch
 '@directus/app': patch
 '@directus/sdk': patch
