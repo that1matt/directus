@@ -63,7 +63,7 @@ export class FilesService extends ItemsService {
 					.first()) ?? null;
 		}
 
-		if (existingFile?.version || existingFile?.version === 0) {
+		if (existingFile) {
 			existingFile.version++;
 		}
 
