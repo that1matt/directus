@@ -151,13 +151,13 @@ describe('Integration Tests', () => {
 					)
 					.response(mockFileData);
 
-				const fakeFormData = new FormData();
-				fakeFormData.append('title', mockFileData.title);
-				fakeFormData.append('type', mockFileData.type);
-				fakeFormData.append('file', new Readable());
+				const mockFormData = new FormData();
+				mockFormData.append('title', mockFileData.title);
+				mockFormData.append('type', mockFileData.type);
+				mockFormData.append('file', new Readable());
 
 				await service.uploadOne(
-					fakeFormData,
+					mockFormData,
 					{
 						storage: 'local',
 						type: 'image/png',
@@ -193,7 +193,7 @@ describe('Integration Tests', () => {
 					.select(
 						'select "folder", "filename_download", "filename_disk", "title", "description", "metadata", "version" from "directus_files" where "id" = ?',
 					)
-					.response({...mockFileData, version: 1 });
+					.response({ ...mockFileData, version: 1 });
 
 				const fakeFormData = new FormData();
 				fakeFormData.append('title', mockFileData.title);

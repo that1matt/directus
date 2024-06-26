@@ -61,7 +61,7 @@ export class FilesService extends ItemsService {
 		}
 
 		if (existingFile?.version || existingFile?.version === 0 || existingFile?.version === null) {
-			existingFile.version = (existingFile.version || 0) + 1
+			existingFile.version = (existingFile.version || 0) + 1;
 		}
 
 		// Merge the existing file's folder and filename_download with the new payload
