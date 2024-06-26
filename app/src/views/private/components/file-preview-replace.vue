@@ -31,7 +31,7 @@ function onInput() {
 			<v-card>
 				<v-card-title>{{ t('replace_file') }}</v-card-title>
 				<v-card-text>
-					<v-upload :file-id="file.id" :file-version="file.version" from-url @input="onInput" />
+					<v-upload :file-id="file.id" from-url @input="onInput" />
 				</v-card-text>
 				<v-card-actions>
 					<v-button secondary @click="replaceFileDialogActive = false">{{ t('done') }}</v-button>

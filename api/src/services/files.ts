@@ -47,17 +47,21 @@ export class FilesService extends ItemsService {
 	): Promise<PrimaryKey> {
 		const storage = await getStorage();
 
-		let existingFile: Record<string, any> | null = null;
+		let existingFile: File | null = null;
 
 		// If the payload contains a primary key, we'll check if the file already exists
 		if (primaryKey !== undefined) {
 			// If the file you're uploading already exists, we'll consider this upload a replace so we'll fetch the existing file's folder and filename_download
 			existingFile =
 				(await this.knex
-					.select('folder', 'filename_download', 'filename_disk', 'title', 'description', 'metadata')
+					.select('folder', 'filename_download', 'filename_disk', 'title', 'description', 'metadata', 'version')
 					.from('directus_files')
 					.where({ id: primaryKey })
 					.first()) ?? null;
+		}
+
+		if (existingFile?.version || existingFile?.version === 0 || existingFile?.version === null) {
+			existingFile.version = (existingFile.version || 0) + 1
 		}
 
 		// Merge the existing file's folder and filename_download with the new payload

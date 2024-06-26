@@ -277,7 +277,7 @@ When the file was uploaded.
 Who updated the file last. Many-to-one to [users](/reference/system/users).
 
 `version` **integer**\
-When the file is replaced using `Replace File` a new version number is created.
+When the existing file is replaced the version value is updated.
 
 `filesize` **number**\
 Size of the file in bytes.
