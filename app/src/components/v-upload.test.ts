@@ -69,7 +69,6 @@ describe('V-Upload', () => {
 		multiple: false,
 		preset: undefined,
 		fileId: undefined,
-		fileVersion: undefined,
 		fromUser: true,
 		fromUrl: false,
 		fromLibrary: false,

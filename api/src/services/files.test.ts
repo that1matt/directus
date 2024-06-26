@@ -98,7 +98,7 @@ describe('Integration Tests', () => {
 				title: 'Test Image',
 				type: 'image/png',
 				folder: null,
-				version: null,
+				version: 0,
 			};
 
 			beforeEach(() => {
@@ -142,7 +142,7 @@ describe('Integration Tests', () => {
 				superCreateOne = vi.spyOn(ItemsService.prototype, 'updateOne').mockResolvedValue(1);
 			});
 
-			it('increases a file version if primary key exists and version is null', async () => {
+			it('increases a file version if primary key exists', async () => {
 				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
 
 				tracker.on
@@ -186,51 +186,7 @@ describe('Integration Tests', () => {
 				);
 			});
 
-			it('increases a file version if primary key exists and version is 1', async () => {
-				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
-
-				tracker.on
-					.select(
-						'select "folder", "filename_download", "filename_disk", "title", "description", "metadata", "version" from "directus_files" where "id" = ?',
-					)
-					.response({ ...mockFileData, version: 1 });
-
-				const fakeFormData = new FormData();
-				fakeFormData.append('title', mockFileData.title);
-				fakeFormData.append('type', mockFileData.type);
-				fakeFormData.append('file', new Readable());
-
-				await service.uploadOne(
-					fakeFormData,
-					{
-						storage: 'local',
-						type: 'image/png',
-						filename_download: 'test_image',
-						title: 'Test Image',
-					},
-					'38162fe3-4d29-43bb-9a59-f668e2d820fa',
-				);
-
-				expect(superUploadOne).toHaveBeenCalled();
-				expect(superGetMetadata).toHaveBeenCalled();
-
-				expect(superCreateOne).toHaveBeenCalledWith(
-					'38162fe3-4d29-43bb-9a59-f668e2d820fa',
-					expect.objectContaining({
-						...mockFileData,
-						version: 2,
-						filesize: 200,
-						height: 100,
-						width: 100,
-						metadata: {},
-					}),
-					expect.objectContaining({
-						emitEvents: false,
-					}),
-				);
-			});
-
-			it('should not increase a file version if primary key does not exists', async () => {
+			it('should not increase a file version if primary key does not exist', async () => {
 				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
 
 				const fakeFormData = new FormData();

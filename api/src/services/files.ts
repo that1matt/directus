@@ -47,7 +47,10 @@ export class FilesService extends ItemsService {
 	): Promise<PrimaryKey> {
 		const storage = await getStorage();
 
-		let existingFile: File | null = null;
+		let existingFile: Pick<
+			File,
+			'folder' | 'filename_download' | 'filename_disk' | 'title' | 'description' | 'metadata' | 'version'
+		> | null = null;
 
 		// If the payload contains a primary key, we'll check if the file already exists
 		if (primaryKey !== undefined) {
@@ -60,8 +63,8 @@ export class FilesService extends ItemsService {
 					.first()) ?? null;
 		}
 
-		if (existingFile?.version || existingFile?.version === 0 || existingFile?.version === null) {
-			existingFile.version = (existingFile.version || 0) + 1;
+		if (existingFile?.version || existingFile?.version === 0) {
+			existingFile.version++;
 		}
 
 		// Merge the existing file's folder and filename_download with the new payload

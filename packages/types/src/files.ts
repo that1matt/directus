@@ -12,7 +12,7 @@ export type File = {
 	uploaded_on: string;
 	modified_by: string | null;
 	modified_on: string;
-	version: number | null;
+	version: number;
 	charset: string | null;
 	filesize: number;
 	width: number | null;

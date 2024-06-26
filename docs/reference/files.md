@@ -277,7 +277,8 @@ When the file was uploaded.
 Who updated the file last. Many-to-one to [users](/reference/system/users).
 
 `version` **integer**\
-When the existing file is replaced the version value is updated.
+When the existing file is replaced the version value is updated.\
+The default value is `0`.
 
 `filesize` **number**\
 Size of the file in bytes.
