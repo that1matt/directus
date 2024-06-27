@@ -6,4 +6,4 @@
 '@directus/sdk': patch
 ---
 
-Add `version` to `directus_files` collection when using the `Replace File` toggle on images
+Add `version` field to `directus_files` collection to track when existing file is replaced.
