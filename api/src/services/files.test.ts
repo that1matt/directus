@@ -94,7 +94,7 @@ describe('Integration Tests', () => {
 				id: '38162fe3-4d29-43bb-9a59-f668e2d820fa',
 				storage: 'local',
 				filename_disk: '38162fe3-4d29-43bb-9a59-f668e2d820fa.png',
-				filename_download: 'test_image',
+				filename_download: 'test_image.png',
 				title: 'Test Image',
 				type: 'image/png',
 				folder: null,
@@ -142,7 +142,7 @@ describe('Integration Tests', () => {
 				superCreateOne = vi.spyOn(ItemsService.prototype, 'updateOne').mockResolvedValue(1);
 			});
 
-			it('increases a file version if primary key exists', async () => {
+			it('should increase the file `version` and update `filename_download` & `filename_disk` if primary key exists', async () => {
 				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
 
 				tracker.on
@@ -160,7 +160,7 @@ describe('Integration Tests', () => {
 					mockFormData,
 					{
 						storage: 'local',
-						type: 'image/png',
+						type: 'image/jpeg',
 						filename_download: 'test_image',
 						title: 'Test Image',
 					},
@@ -179,6 +179,9 @@ describe('Integration Tests', () => {
 						height: 100,
 						width: 100,
 						metadata: {},
+						type: 'image/jpeg',
+						filename_download: 'test_image.jpeg',
+						filename_disk: '38162fe3-4d29-43bb-9a59-f668e2d820fa.jpeg',
 					}),
 					expect.objectContaining({
 						emitEvents: false,
@@ -208,10 +211,85 @@ describe('Integration Tests', () => {
 					1,
 					expect.objectContaining({
 						storage: 'local',
-						filename_download: 'test_image',
+						filename_download: 'test_image.png',
 						title: 'Test Image',
 						type: 'image/png',
 						filename_disk: '1.png',
+						filesize: 200,
+						height: 100,
+						width: 100,
+						metadata: {},
+					}),
+					expect.objectContaining({
+						emitEvents: false,
+					}),
+				);
+			});
+
+			it('should use default filename_disk if filename_disk is not supplied', async () => {
+				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
+
+				const fakeFormData = new FormData();
+				fakeFormData.append('title', mockFileData.title);
+				fakeFormData.append('type', mockFileData.type);
+				fakeFormData.append('file', new Readable());
+
+				await service.uploadOne(fakeFormData, {
+					storage: 'local',
+					type: 'image/png',
+					filename_download: 'test_image.png',
+					title: 'Test Image',
+				});
+
+				expect(superUploadOne).toHaveBeenCalled();
+				expect(superGetMetadata).toHaveBeenCalled();
+
+				expect(superCreateOne).toHaveBeenCalledWith(
+					1,
+					expect.objectContaining({
+						storage: 'local',
+						filename_download: 'test_image.png',
+						title: 'Test Image',
+						type: 'image/png',
+						filename_disk: '1.png',
+						filesize: 200,
+						height: 100,
+						width: 100,
+						metadata: {},
+					}),
+					expect.objectContaining({
+						emitEvents: false,
+					}),
+				);
+			});
+
+			it('should use supplied filename_disk', async () => {
+				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
+
+				const fakeFormData = new FormData();
+				fakeFormData.append('title', mockFileData.title);
+				fakeFormData.append('type', mockFileData.type);
+				fakeFormData.append('file', new Readable());
+
+				await service.uploadOne(fakeFormData, {
+					storage: 'local',
+					type: 'image/png',
+					filename_download: 'test_image.png',
+					filename_disk: 'test_image.png',
+					title: 'Test Image',
+				});
+
+				expect(superUploadOne).toHaveBeenCalled();
+				expect(superGetMetadata).toHaveBeenCalled();
+
+				expect(superCreateOne).toHaveBeenCalledWith(
+					1,
+					expect.objectContaining({
+						storage: 'local',
+						filename_download: 'test_image.png',
+						title: 'Test Image',
+						type: 'image/png',
+						filename_disk: 'test_image.png',
 						filesize: 200,
 						height: 100,
 						width: 100,

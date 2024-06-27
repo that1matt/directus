@@ -90,10 +90,18 @@ export class FilesService extends ItemsService {
 		}
 
 		const fileExtension =
-			path.extname(payload.filename_download!) || (payload.type && '.' + extension(payload.type)) || '';
+			path.extname(payload.filename_download!) || (payload?.type && '.' + extension(payload.type)) || '';
+
+		if (!path.extname(payload.filename_download!) && payload?.type) {
+			payload.filename_download = payload.filename_download + '.' + extension(payload.type);
+		}
 
 		// The filename_disk is the FINAL filename on disk
 		payload.filename_disk ||= primaryKey + (fileExtension || '');
+
+		if (existingFile && path.extname(payload.filename_disk!) !== fileExtension) {
+			payload.filename_disk = primaryKey + (fileExtension || '');
+		}
 
 		// Temp filename is used for replacements
 		const tempFilenameDisk = 'temp_' + payload.filename_disk;
