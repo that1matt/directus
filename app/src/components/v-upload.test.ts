@@ -1,12 +1,22 @@
 import type { GlobalMountOptions } from '@/__utils__/types';
+import { Focus } from '@/__utils__/focus';
 import { mount } from '@vue/test-utils';
 import { expect, test, beforeEach, vi, describe } from 'vitest';
 import { createI18n } from 'vue-i18n';
 import { Tooltip } from '../__utils__/tooltip';
 import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
-
+import VButton from './v-button.vue';
 import VUpload from './v-upload.vue';
+
+vi.mock('vue-router', () => ({
+	useRoute: vi.fn(),
+	useLink: vi.fn().mockImplementation(() => ({
+		route: vi.fn().mockReturnValue(''),
+		isActive: vi.fn().mockReturnValue(false),
+		isExactActive: vi.fn().mockReturnValue(false),
+	})),
+}));
 
 const i18n = createI18n({
 	legacy: false,
@@ -30,10 +40,15 @@ const global: GlobalMountOptions = {
 		'v-card-actions',
 		'v-card',
 		'v-dialog',
+		'v-progress-circular',
 	],
 	plugins: [i18n],
 	directives: {
 		Tooltip,
+		Focus,
+	},
+	components: {
+		'v-button': VButton,
 	},
 };
 
