@@ -6,4 +6,4 @@
 '@directus/sdk': patch
 ---
 
-Add `version` field to `directus_files` collection to track when existing file is replaced.
+Add `replaced_on` field to `directus_files` collection to track when an existing file is replaced.

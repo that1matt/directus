@@ -25,7 +25,7 @@ const inputFile = {
 	metadata: null,
 	modified_by: null,
 	modified_on: '',
-	version: 0,
+	replaced_on: null,
 	focal_point_x: null,
 	focal_point_y: null,
 } satisfies File;

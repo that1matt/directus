@@ -161,7 +161,7 @@ fields:
     width: half
     readonly: true
 
-  - field: version
-    interface: input
+  - field: replaced_on
+    interface: datetime
     width: half
     readonly: true

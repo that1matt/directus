@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+import { ReadableStream } from 'node:stream/web';
 import { StorageManager } from '@directus/storage';
 import { InvalidPayloadError } from '@directus/errors';
 import type { Knex } from 'knex';
@@ -17,10 +19,20 @@ import {
 } from 'vitest';
 import { FilesService, ItemsService } from './index.js';
 import { _cache } from '../storage/index.js';
-import { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
 
 vi.mock('@directus/storage');
+
+vi.mock('../../src/database/index', () => ({
+	getDatabaseClient: vi.fn().mockReturnValue('postgres'),
+}));
+
+vi.mock('../database/helpers/index', () => ({
+	getHelpers: vi.fn().mockImplementation(() => ({
+		date: {
+			writeTimestamp: vi.fn().mockReturnValue(new Date('2024-06-28T14:00:00.000Z')),
+		},
+	})),
+}));
 
 describe('Integration Tests', () => {
 	let db: MockedFunction<Knex>;
@@ -98,7 +110,7 @@ describe('Integration Tests', () => {
 				title: 'Test Image',
 				type: 'image/png',
 				folder: null,
-				version: 0,
+				replaced_on: null,
 			};
 
 			beforeEach(() => {
@@ -142,12 +154,12 @@ describe('Integration Tests', () => {
 				superCreateOne = vi.spyOn(ItemsService.prototype, 'updateOne').mockResolvedValue(1);
 			});
 
-			it('should increase the file `version` and update `filename_download` & `filename_disk` if primary key exists', async () => {
+			it('should update the file `replaced_on` with current date and update `filename_download` & `filename_disk` if primary key exists', async () => {
 				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
 
 				tracker.on
 					.select(
-						'select "folder", "filename_download", "filename_disk", "title", "description", "metadata", "version" from "directus_files" where "id" = ?',
+						'select "folder", "filename_download", "filename_disk", "title", "description", "metadata", "replaced_on" from "directus_files" where "id" = ?',
 					)
 					.response(mockFileData);
 
@@ -174,7 +186,6 @@ describe('Integration Tests', () => {
 					'38162fe3-4d29-43bb-9a59-f668e2d820fa',
 					expect.objectContaining({
 						...mockFileData,
-						version: 1,
 						filesize: 200,
 						height: 100,
 						width: 100,
@@ -182,6 +193,7 @@ describe('Integration Tests', () => {
 						type: 'image/jpeg',
 						filename_download: 'test_image.jpeg',
 						filename_disk: '38162fe3-4d29-43bb-9a59-f668e2d820fa.jpeg',
+						replaced_on: new Date('2024-06-28T14:00:00.000Z'),
 					}),
 					expect.objectContaining({
 						emitEvents: false,
@@ -189,7 +201,7 @@ describe('Integration Tests', () => {
 				);
 			});
 
-			it('should not increase a file version if primary key does not exist', async () => {
+			it('should not update file `replaced_on` if primary key does not exist', async () => {
 				tracker.on.select('select "storage_default_folder" from "directus_settings"').response([]);
 
 				const fakeFormData = new FormData();
