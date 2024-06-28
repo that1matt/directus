@@ -4,6 +4,7 @@ import formatTitle from '@directus/format-title';
 import type { BusboyFileStream, File, PrimaryKey } from '@directus/types';
 import { toArray } from '@directus/utils';
 import type { AxiosResponse } from 'axios';
+import { readableStreamToString, generateChecksumHash } from '@directus/utils/node';
 import encodeURL from 'encodeurl';
 import exif, { type GPSInfoTags, type ImageTags, type IopTags, type PhotoTags } from 'exif-reader';
 import type { IccProfile } from 'icc';
@@ -17,7 +18,6 @@ import zlib from 'node:zlib';
 import path from 'path';
 import sharp from 'sharp';
 import url from 'url';
-import { getHelpers } from '../database/helpers/index.js';
 import { SUPPORTED_IMAGE_METADATA_FORMATS } from '../constants.js';
 import emitter from '../emitter.js';
 import { useLogger } from '../logger.js';
@@ -50,7 +50,7 @@ export class FilesService extends ItemsService {
 
 		let existingFile: Pick<
 			File,
-			'folder' | 'filename_download' | 'filename_disk' | 'title' | 'description' | 'metadata' | 'replaced_on'
+			'folder' | 'filename_download' | 'filename_disk' | 'title' | 'description' | 'metadata' | 'hash'
 		> | null = null;
 
 		// If the payload contains a primary key, we'll check if the file already exists
@@ -58,15 +58,10 @@ export class FilesService extends ItemsService {
 			// If the file you're uploading already exists, we'll consider this upload a replace so we'll fetch the existing file's folder and filename_download
 			existingFile =
 				(await this.knex
-					.select('folder', 'filename_download', 'filename_disk', 'title', 'description', 'metadata', 'replaced_on')
+					.select('folder', 'filename_download', 'filename_disk', 'title', 'description', 'metadata', 'hash')
 					.from('directus_files')
 					.where({ id: primaryKey })
 					.first()) ?? null;
-		}
-
-		if (existingFile) {
-			const helpers = getHelpers(this.knex);
-			existingFile.replaced_on = new Date(helpers.date.writeTimestamp(new Date().toISOString()));
 		}
 
 		// Merge the existing file's folder and filename_download with the new payload
@@ -94,6 +89,7 @@ export class FilesService extends ItemsService {
 		const fileExtension =
 			path.extname(payload.filename_download!) || (payload?.type && '.' + extension(payload.type)) || '';
 
+		// Append the file extension to the filename_download if it is missing
 		if (!path.extname(payload.filename_download!) && payload?.type) {
 			payload.filename_download = payload.filename_download + '.' + extension(payload.type);
 		}
@@ -101,6 +97,7 @@ export class FilesService extends ItemsService {
 		// The filename_disk is the FINAL filename on disk
 		payload.filename_disk ||= primaryKey + (fileExtension || '');
 
+		// Append the file extension to the filename_disk if it is missing
 		if (existingFile && path.extname(payload.filename_disk!) !== fileExtension) {
 			payload.filename_disk = primaryKey + (fileExtension || '');
 		}
@@ -209,6 +206,22 @@ export class FilesService extends ItemsService {
 			if (!payload.tags && tags) {
 				payload.tags = tags;
 			}
+		}
+
+		// If this is a new file, we will set the hash value once
+		if (isReplacement === false || primaryKey === undefined) {
+			const stream = await storage.location(data.storage).read(payload.filename_disk);
+			const hash = generateChecksumHash(await readableStreamToString(stream));
+
+			payload.hash = hash;
+		}
+
+		// If this is a replacement file, we will update the hash value
+		if (isReplacement === true) {
+			const stream = await storage.location(data.storage).read(payload.filename_disk);
+			const hash = generateChecksumHash(await readableStreamToString(stream));
+
+			payload.hash = hash;
 		}
 
 		// We do this in a service without accountability. Even if you don't have update permissions to the file,

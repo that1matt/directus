@@ -1,4 +1,5 @@
 export * from './array-helpers.js';
+export * from './generate-checksum-hash.js';
 export * from './get-node-env.js';
 export * from './is-readable-stream.js';
 export * from './list-folders.js';

@@ -161,7 +161,7 @@ fields:
     width: half
     readonly: true
 
-  - field: replaced_on
-    interface: datetime
+  - field: hash
     width: half
     readonly: true
+    hidden: true

@@ -4,6 +4,7 @@
 '@directus/api': patch
 '@directus/app': patch
 '@directus/sdk': patch
+'@directus/utils': patch
 ---
 
-Add `replaced_on` field to `directus_files` collection to track when an existing file is replaced.
+Add `hash` field to `directus_files` collection to track when an existing file is replaced.
