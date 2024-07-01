@@ -4,7 +4,6 @@ import formatTitle from '@directus/format-title';
 import type { BusboyFileStream, File, PrimaryKey } from '@directus/types';
 import { toArray } from '@directus/utils';
 import type { AxiosResponse } from 'axios';
-import { readableStreamToString, generateChecksumHash } from '@directus/utils/node';
 import encodeURL from 'encodeurl';
 import exif, { type GPSInfoTags, type ImageTags, type IopTags, type PhotoTags } from 'exif-reader';
 import type { IccProfile } from 'icc';
@@ -26,6 +25,7 @@ import { getStorage } from '../storage/index.js';
 import type { AbstractServiceOptions, MutationOptions } from '../types/index.js';
 import { parseIptc, parseXmp } from '../utils/parse-image-metadata.js';
 import { ItemsService } from './items.js';
+import { Hash, createHash } from 'node:crypto';
 
 const env = useEnv();
 const logger = useLogger();
@@ -211,7 +211,7 @@ export class FilesService extends ItemsService {
 		// If this is a new file, we will set the hash value once
 		if (isReplacement === false || primaryKey === undefined) {
 			const stream = await storage.location(data.storage).read(payload.filename_disk);
-			const hash = generateChecksumHash(await readableStreamToString(stream));
+			const hash = await this.getHash(stream);
 
 			payload.hash = hash;
 		}
@@ -219,7 +219,7 @@ export class FilesService extends ItemsService {
 		// If this is a replacement file, we will update the hash value
 		if (isReplacement === true) {
 			const stream = await storage.location(data.storage).read(payload.filename_disk);
-			const hash = generateChecksumHash(await readableStreamToString(stream));
+			const hash = await this.getHash(stream);
 
 			payload.hash = hash;
 		}
@@ -250,6 +250,21 @@ export class FilesService extends ItemsService {
 		}
 
 		return primaryKey;
+	}
+
+	/**
+	 * Extract file hash from stream content
+	 */
+	async getHash(stream: Readable): Promise<string> {
+		let hash = '';
+
+		await pipeline(stream, createHash('md5').setEncoding('hex'), async function (source: AsyncIterable<Hash>) {
+			for await (const chunk of source) {
+				hash += chunk;
+			}
+		});
+
+		return hash;
 	}
 
 	/**
